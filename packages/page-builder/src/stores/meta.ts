@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 import type { ComponentInfo, PageMeta, ComponentRelationship } from 'engine-types'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 /**
  * 根节点id
  */
 const ROOT_ID = 'root'
 
-class StructNode {
+export class StructNode {
   readonly id: string
   readonly name: string
   get parent(): StructNode | null {
@@ -159,10 +159,17 @@ export const useMetaStore = defineStore('meta', () => {
   }
 
   /**
+   * 结构
+   */
+  const getStruct = computed(() => {
+    return structNodeMap.value.get(ROOT_ID)
+  })
+
+  /**
    * 转换元数据
    */
   const toPageMeta = (): PageMeta => {
-    const rootStructNode = structNodeMap.value.get('root') as StructNode
+    const rootStructNode = structNodeMap.value.get(ROOT_ID) as StructNode
     return {
       relationship: rootStructNode.getNodeRelationship(),
       componentInfoList: rootStructNode.getNodeInfoList()
@@ -175,6 +182,7 @@ export const useMetaStore = defineStore('meta', () => {
 
     structNodeMap,
     init,
+    getStruct,
     toPageMeta
   }
 })

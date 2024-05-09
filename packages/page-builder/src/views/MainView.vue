@@ -12,6 +12,8 @@
             <iframe :src="displayUrl" class="display-view" />
           </el-scrollbar>
         </el-main>
+        <el-aside>
+        </el-aside>
       </el-container>
     </el-container>
   </el-config-provider>

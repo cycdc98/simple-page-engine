@@ -1,8 +1,14 @@
 <template>
-  <div @drop="drop" @dragover="dragover" class="display-container"></div>
+  <component :is="getStruct?.name" :key="getStruct?.id" :info="getStruct" />
 </template>
 
 <script setup lang="ts">
+import { useMetaStore } from '@/stores/meta'
+import { storeToRefs } from 'pinia';
+
+const metaStore = useMetaStore()
+const { getStruct } = storeToRefs(metaStore)
+
 const drop = (ev: DragEvent) => {
   ev.preventDefault()
 }
@@ -10,6 +16,15 @@ const drop = (ev: DragEvent) => {
 const dragover = (ev: DragEvent) => {
   ev.preventDefault()
 }
+
+metaStore.init({
+  relationship: {
+    id: 'root',
+  },
+  componentInfoList: [
+    { id: 'root', name: 'FlowLayout' }
+  ]
+})
 </script>
 
 <style scoped lang="scss">
