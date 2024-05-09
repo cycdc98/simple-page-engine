@@ -14,6 +14,7 @@
     "node": "20.12.2"
   },
   "workspaces": [
-    "packages/page-builder"
+    "packages/page-builder",
+    "packages/engine-types"
   ]
 }
