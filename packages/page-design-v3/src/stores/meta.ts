@@ -89,9 +89,9 @@ export const useMetaStore = defineStore('meta', () => {
    */
   const initFinishStatus = ref(false)
 
-  const getInitFinsishStatus = () => {
+  const getInitFinsishStatus = computed(() => {
     return initFinishStatus.value
-  }
+  })
 
   /**
    * 元素节点映射表

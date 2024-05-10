@@ -5,7 +5,6 @@
       <el-container>
         <el-aside>
           <div draggable="true" @dragstart="startDrag">按钮</div>
-          <div draggable="true">xxx</div>
         </el-aside>
         <el-main>
           <el-scrollbar>
@@ -20,10 +19,13 @@
 </template>
 
 <script setup lang="ts">
-const displayUrl = `${import.meta.env.BASE_URL}display`
+const displayUrl = `${import.meta.env.VITE_DESIGN_URL}`
 
 const startDrag = (ev: DragEvent) => {
-  ev.preventDefault()
+  console.log(ev)
+  ev.dataTransfer!.setData('text/plain', JSON.stringify({
+    name: 'ElButton'
+  }))
 }
 </script>
 

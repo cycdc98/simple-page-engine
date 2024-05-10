@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev:page-builder": "npm run dev --workspace packages/page-builder",
+    "dev:page-design-v3": "npm run dev --workspace packages/page-design-v3",
+    "dev": "run-p dev:page-builder dev:page-design-v3",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,6 +17,7 @@
   },
   "workspaces": [
     "packages/page-builder",
+    "packages/page-design-v3",
     "packages/engine-types"
   ]
 }
