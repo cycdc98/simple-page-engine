@@ -9,14 +9,6 @@ import { storeToRefs } from 'pinia';
 const metaStore = useMetaStore()
 const { getStruct } = storeToRefs(metaStore)
 
-const drop = (ev: DragEvent) => {
-  ev.preventDefault()
-}
-
-const dragover = (ev: DragEvent) => {
-  ev.preventDefault()
-}
-
 metaStore.init({
   relationship: {
     id: 'root',

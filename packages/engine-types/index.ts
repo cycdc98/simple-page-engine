@@ -6,7 +6,7 @@ export interface ComponentInfo {
 export interface ComponentRelationship {
   id: string;
   parentId?: string;
-  children?: Array<ComponentRelationship>;
+  children?: Array<ComponentRelationship> | null;
 }
 
 export interface PageMeta {

@@ -10,19 +10,24 @@ const ROOT_ID = 'root'
 export class StructNode {
   readonly id: string
   readonly name: string
+  private _parent: StructNode | null = null
   get parent(): StructNode | null {
-    return this.parent || null
+    return this._parent
   }
   /**
    * 设置节点父节点，root节点无父节点
    */
   set parent(val: StructNode) {
     if (this.isRoot()) return
-    this.parent = val
+    this._parent = val
   }
-  privious: StructNode | null = null
-  next: StructNode | null = null
-  children: StructNode | null = null
+  private _children: Array<StructNode> | null = null
+  get children(): Array<StructNode> | null {
+    return this._children || null
+  }
+  private set children(val: Array<StructNode>) {
+    this._children = val
+  }
 
   constructor(id: string, name: string) {
     this.id = id
@@ -34,17 +39,6 @@ export class StructNode {
    */
   isRoot() {
     return this.id === ROOT_ID
-  }
-
-  /**
-   * 子节点迭代器
-   */
-  *getChildrenIteration() {
-    let cursor = this.children
-    while (cursor) {
-      yield cursor
-      cursor = cursor.next
-    }
   }
 
   /**
@@ -63,9 +57,9 @@ export class StructNode {
   getNodeInfoList(): Array<ComponentInfo> {
     return [
       this.getNodeInfo(),
-      ...Array.from(this.getChildrenIteration())
-        .map((item) => item.getNodeInfoList())
-        .reduce((previousValue, currentValue) => [...previousValue, ...currentValue])
+      ...(this.children
+        ?.map((item) => item.getNodeInfoList())
+        .reduce((previousValue, currentValue) => [...previousValue, ...currentValue]) || [])
     ]
   }
 
@@ -76,8 +70,16 @@ export class StructNode {
     return {
       id: this.id,
       parentId: this.parent?.id,
-      children: Array.from(this.getChildrenIteration()).map((item) => item.getNodeRelationship())
+      children: this.children?.map((item) => item.getNodeRelationship()) || null
     }
+  }
+
+  addChildren(...children: Array<StructNode>) {
+    children.forEach((item) => {
+      item.parent = this
+    })
+    if (!this.children) this.children = []
+    this.children.push(...children)
   }
 }
 
@@ -127,24 +129,10 @@ export const useMetaStore = defineStore('meta', () => {
         current.parent = parent
       }
     }
-    relationship.children?.forEach((item, index, array) => {
-      const cursorChild = structNodeMap.value.get(item.id)
+    relationship.children?.forEach((item) => {
+      const cursorChild = structNodeMap.value.get(item.id) as StructNode | undefined
       if (!cursorChild) return
-      if (index === 1) {
-        current.children = cursorChild
-        if (array.length > 1) {
-          const secondChild = structNodeMap.value.get(array[2].id)
-          if (secondChild) cursorChild.next = secondChild
-        }
-      } else if (index === array.length - 1) {
-        const secondToLastChild = structNodeMap.value.get(array[index - 1].id)
-        if (secondToLastChild) cursorChild.privious = secondToLastChild
-      } else {
-        const priviousOne = structNodeMap.value.get(array[index - 1].id)
-        if (priviousOne) cursorChild.privious = priviousOne
-        const nextOne = structNodeMap.value.get(array[index + 1].id)
-        if (nextOne) cursorChild.next = nextOne
-      }
+      current.addChildren(cursorChild)
       initRelationship(item)
     })
   }
