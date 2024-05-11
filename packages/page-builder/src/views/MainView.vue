@@ -9,6 +9,8 @@
         <el-main>
           <el-scrollbar>
             <iframe :src="displayUrl" class="display-view" />
+            <SelectedElement />
+            <DragOver />
           </el-scrollbar>
         </el-main>
         <el-aside>
@@ -19,6 +21,14 @@
 </template>
 
 <script setup lang="ts">
+import SelectedElement from '@/components/SelectedElement.vue'
+import DragOver from '@/components/DragOver.vue';
+import { useDragOverStore } from '@/stores/drag-over-store'
+import { useSelectedElementStore } from '@/stores/selected-element-store'
+
+const dragOverStore = useDragOverStore()
+const selectedElementStore = useSelectedElementStore()
+
 const displayUrl = `${import.meta.env.VITE_DESIGN_URL}`
 
 const startDrag = (ev: DragEvent) => {
@@ -27,6 +37,19 @@ const startDrag = (ev: DragEvent) => {
     name: 'ElButton'
   }))
 }
+
+window.addEventListener('message', ({ data }) => {
+  switch (data.type) {
+    case 'selectElement':
+      selectedElementStore.set({ width: data.width, height: data.height, top: data.top, left: data.left, show: true })
+      break;
+    case 'dragElement':
+      dragOverStore.set()
+      break;
+    default:
+      break;
+  }
+})
 </script>
 
 <style scoped lang="scss">
