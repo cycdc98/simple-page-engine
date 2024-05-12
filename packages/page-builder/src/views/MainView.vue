@@ -32,7 +32,6 @@ const selectedElementStore = useSelectedElementStore()
 const displayUrl = `${import.meta.env.VITE_DESIGN_URL}`
 
 const startDrag = (ev: DragEvent) => {
-  console.log(ev)
   ev.dataTransfer!.setData('text/plain', JSON.stringify({
     name: 'ElButton'
   }))
@@ -41,10 +40,10 @@ const startDrag = (ev: DragEvent) => {
 window.addEventListener('message', ({ data }) => {
   switch (data.type) {
     case 'selectElement':
-      selectedElementStore.set({ width: data.width, height: data.height, top: data.top, left: data.left, show: true })
+      selectedElementStore.set({ width: data.width, height: data.height, top: data.top, left: data.left, info: data.left, show: data.show })
       break;
     case 'dragElement':
-      dragOverStore.set()
+      dragOverStore.set({ width: data.width, height: data.height, left: data.left, top: data.top, ins: data.ins, show: data.show })
       break;
     default:
       break;
