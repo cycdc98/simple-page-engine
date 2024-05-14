@@ -2,7 +2,7 @@
   <el-scrollbar>
     <div class="page-builder-dispaly-container">
       <template v-if="props.info.children?.length">
-        <CommonComponent v-for="item in props.info.children" :key="item.id" :info="item" :id="item.id" />
+        <CommonComponent v-for="item in props.info.children" :key="item.id" :is="item.name" :info="item" :id="item.id" />
       </template>
       <template v-else>
         <FlexCenter>
@@ -27,8 +27,8 @@ const props = defineProps({
 
 <style scoped lang="scss">
 .page-builder-dispaly-container {
-  width: 100vw;
-  min-height: 100vh;
+  width: 100%;
+  display: flex;
   position: relative;
   background-color: #eee;
 }

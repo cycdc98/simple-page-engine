@@ -1,13 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref, type Ref } from 'vue'
-
-enum InsPosition {
-  INNER,
-  TOP,
-  RIGHT,
-  BOTTOM,
-  LEFT
-}
+import { DragPosition } from 'engine-types'
 
 export const useDragOverStore = defineStore('dragOver', () => {
   const _show = ref(false)
@@ -15,7 +8,7 @@ export const useDragOverStore = defineStore('dragOver', () => {
   const _height = ref(0)
   const _left = ref(0)
   const _top = ref(0)
-  const _ins: Ref<InsPosition> = ref(InsPosition.INNER)
+  const _ins: Ref<DragPosition> = ref(DragPosition.INNER)
 
   const isShow = computed(() => _show.value)
   const getWidth = computed(() => `${_width.value}px`)
@@ -36,7 +29,7 @@ export const useDragOverStore = defineStore('dragOver', () => {
     height: number
     left: number
     top: number
-    ins: InsPosition
+    ins: DragPosition
     show: boolean
   }) => {
     if (!show) {

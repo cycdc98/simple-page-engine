@@ -1,6 +1,12 @@
 import { defineStore } from 'pinia'
-import type { ComponentInfo, PageMeta, ComponentRelationship } from 'engine-types'
+import {
+  type ComponentInfo,
+  type PageMeta,
+  type ComponentRelationship,
+  DragPosition
+} from 'engine-types'
 import { computed, ref } from 'vue'
+import { v4 as uuid } from 'uuid'
 
 /**
  * 根节点id
@@ -10,6 +16,7 @@ const ROOT_ID = 'root'
 export class StructNode {
   readonly id: string
   readonly name: string
+  readonly type?: string
   private _parent: StructNode | null = null
   get parent(): StructNode | null {
     return this._parent
@@ -29,9 +36,10 @@ export class StructNode {
     this._children = val
   }
 
-  constructor(id: string, name: string) {
+  constructor(id: string, name: string, type?: 'flex-container') {
     this.id = id
     this.name = name
+    this.type = type
   }
 
   /**
@@ -164,6 +172,60 @@ export const useMetaStore = defineStore('meta', () => {
     }
   }
 
+  const getNewUUID = () => {
+    let newId
+    do {
+      newId = uuid()
+    } while (structNodeMap.value.has(newId))
+    return newId
+  }
+
+  /**
+   * 插入节点
+   */
+  const insert = (id: string, position: DragPosition, componentInfo: { name: string }) => {
+    const sourceEl = structNodeMap.value.get(id) as StructNode
+    let parent = sourceEl.parent
+    if (!parent) {
+      // root 节点
+      if (position === DragPosition.INNER) {
+        const newStructNode = new StructNode(getNewUUID(), componentInfo.name)
+        structNodeMap.value.set(newStructNode.id, newStructNode);
+        sourceEl.addChildren(newStructNode)
+        newStructNode.parent = sourceEl
+      }
+      return
+    }
+    if (!parent.type) {
+      const index = parent.children!.findIndex((item) => item === sourceEl)
+      const replaceContainer = new StructNode(getNewUUID(), 'FlexLayout', 'flex-container')
+      structNodeMap.value.set(replaceContainer.id, replaceContainer)
+      sourceEl.parent = replaceContainer
+      replaceContainer.addChildren(sourceEl)
+      replaceContainer.parent = parent
+      parent.children!.splice(index, 1, replaceContainer)
+      parent = replaceContainer
+    }
+    const index = parent.children!.findIndex((item) => item === sourceEl)
+    const newStructNode = new StructNode(getNewUUID(), componentInfo.name)
+    structNodeMap.value.set(newStructNode.id, newStructNode)
+    if (position === DragPosition.LEFT) {
+      parent.children!.splice(index, 0, newStructNode)
+      newStructNode.parent = parent
+    } else if (position === DragPosition.RIGHT) {
+      parent.children!.splice(index + 1, 0, newStructNode)
+      newStructNode.parent = parent
+    } else if (position === DragPosition.TOP) {
+      const parentIndex = parent.parent!.children!.findIndex((item) => item === parent)
+      parent.parent?.children?.splice(parentIndex, 0, newStructNode)
+      newStructNode.parent = parent.parent as StructNode
+    } else if (position === DragPosition.BOTTOM) {
+      const parentIndex = parent.parent!.children!.findIndex((item) => item === parent)
+      parent.parent?.children?.splice(parentIndex + 1, 0, newStructNode)
+      newStructNode.parent = parent.parent as StructNode
+    }
+  }
+
   return {
     initFinishStatus,
     getInitFinsishStatus,
@@ -171,6 +233,7 @@ export const useMetaStore = defineStore('meta', () => {
     structNodeMap,
     init,
     getStruct,
-    toPageMeta
+    toPageMeta,
+    insert
   }
 })

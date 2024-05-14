@@ -1,14 +1,17 @@
 <template>
   <component :is='props.info.name' :key='props.info.id' :info='props.info' ref='commonComponent'
-    @click.stop='generateSelectedRect' @dragover="dragover" @dragenter="dragenter" @dragleave="dragleave"
-    @dragexit="dragexit" @drop="drop" />
+    @click.stop='generateSelectedRect' @dragover.stop="dragover" @dragenter.stop="dragenter" @dragleave.stop="dragleave"
+    @dragexit.stop="dragexit" @drop.stop="drop" />
 </template>
 
 <script setup lang='ts'>
-import { StructNode } from '@/stores/meta'
+import { StructNode, useMetaStore } from '@/stores/meta'
 import { ref } from 'vue'
 import type { Ref } from 'vue'
 import CommonComponent from './CommonComponent.vue';
+import { DragPosition } from 'engine-types'
+
+const metaStore = useMetaStore()
 
 const props = defineProps({
   info: {
@@ -26,13 +29,7 @@ const componentPosition = {
   right: 0
 }
 
-enum InsPosition {
-  INNER,
-  TOP,
-  RIGHT,
-  BOTTOM,
-  LEFT
-}
+let insert: DragPosition | null = null
 
 const commonComponent: Ref<InstanceType<typeof CommonComponent> | null> = ref(null)
 
@@ -48,8 +45,10 @@ const generateSelectedRect = () => {
 }
 
 const drop = (ev: DragEvent) => {
-  // JSON.parse(ev.dataTransfer!.getData('text/plain') as string)
+  const newElBasicInfo = JSON.parse(ev.dataTransfer!.getData('text/plain') as string)
   ev.dataTransfer!.clearData()
+  metaStore.insert(props.info.id, insert as DragPosition, newElBasicInfo)
+  
   postMessage({
     type: 'dragElement', show: false
   })
@@ -58,17 +57,20 @@ const drop = (ev: DragEvent) => {
 const dragover = (ev: DragEvent) => {
   ev.preventDefault()
   const distance = {
-    [InsPosition.TOP]: ev.clientY - componentPosition.top,
-    [InsPosition.RIGHT]: componentPosition.right - ev.clientX,
-    [InsPosition.BOTTOM]: componentPosition.bottom - ev.clientY,
-    [InsPosition.LEFT]: ev.clientX - componentPosition.left
+    [DragPosition.TOP]: ev.clientY - componentPosition.top,
+    [DragPosition.RIGHT]: componentPosition.right - ev.clientX,
+    [DragPosition.BOTTOM]: componentPosition.bottom - ev.clientY,
+    [DragPosition.LEFT]: ev.clientX - componentPosition.left
   }
   const minDistance = Math.min(...Object.values(distance))
   if (minDistance > 10) {
-    postMessage({ type: 'dragElement', left: componentPosition.left, top: componentPosition.top, width: componentPosition.width, height: componentPosition.height, ins: InsPosition.INNER, show: true })
+    insert = DragPosition.INNER
+    postMessage({ type: 'dragElement', left: componentPosition.left, top: componentPosition.top, width: componentPosition.width, height: componentPosition.height, ins: DragPosition.INNER, show: true })
   } else {
+    const ins = parseInt(Object.entries(distance).find(item => item[1] === minDistance)![0])
+    insert = ins
     postMessage({
-      type: 'dragElement', left: componentPosition.left, top: componentPosition.top, width: componentPosition.width, height: componentPosition.height, ins: parseInt(Object.entries(distance).find(item => item[1] === minDistance)![0]), show: true
+      type: 'dragElement', left: componentPosition.left, top: componentPosition.top, width: componentPosition.width, height: componentPosition.height, ins, show: true
     })
   }
 }

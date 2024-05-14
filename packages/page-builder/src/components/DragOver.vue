@@ -6,44 +6,37 @@
 import { useDragOverStore } from '@/stores/drag-over-store';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
-
-enum InsPosition {
-  INNER,
-  TOP,
-  RIGHT,
-  BOTTOM,
-  LEFT
-}
+import { DragPosition } from 'engine-types'
 
 const dragOverStore = useDragOverStore()
 
 const { isShow, getWidth, getHeight, getLeft, getTop, getIns } = storeToRefs(dragOverStore)
 
 const styleObj = computed(() => {
-  if (getIns.value === InsPosition.INNER) {
+  if (getIns.value === DragPosition.INNER) {
     return {
       'background-color': '#fff'
     }
   }
-  if (getIns.value === InsPosition.TOP) {
+  if (getIns.value === DragPosition.TOP) {
     return {
       'background-color': '#fff',
       'border-top': '10px solid #ddd'
     }
   }
-  if (getIns.value === InsPosition.RIGHT) {
+  if (getIns.value === DragPosition.RIGHT) {
     return {
       'background-color': '#fff',
       'border-right': '10px solid #ddd'
     }
   }
-  if (getIns.value === InsPosition.BOTTOM) {
+  if (getIns.value === DragPosition.BOTTOM) {
     return {
       'background-color': '#fff',
       'border-bottom': '10px solid #ddd'
     }
   }
-  if (getIns.value === InsPosition.LEFT) {
+  if (getIns.value === DragPosition.LEFT) {
     return {
       'background-color': '#fff',
       'border-left': '10px solid #ddd'
