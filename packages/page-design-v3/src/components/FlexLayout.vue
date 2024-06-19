@@ -2,12 +2,13 @@
   <el-scrollbar>
     <div class="page-builder-dispaly-container">
       <template v-if="props.info.children?.length">
-        <CommonComponent v-for="item in props.info.children" :key="item.id" :is="item.name" :info="item" :id="item.id" />
+        <CommonComponent v-for="item in props.info.children" :key="item.id" :is="item.name" :info="item"
+          :id="item.id" />
       </template>
       <template v-else>
-        <FlexCenter>
+        <div class="flex-center">
           从组件库拖入组件进行构建
-        </FlexCenter>
+        </div>
       </template>
     </div>
   </el-scrollbar>
@@ -15,7 +16,6 @@
 
 <script setup lang="ts">
 import CommonComponent from '@/components/CommonComponent.vue'
-import FlexCenter from '@/components/FlexCenter.vue'
 import { StructNode } from '@/stores/meta'
 const props = defineProps({
   info: {
@@ -31,5 +31,15 @@ const props = defineProps({
   display: flex;
   position: relative;
   background-color: #eee;
+
+  .flex-center {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    color: #aaa;
+  }
 }
 </style>

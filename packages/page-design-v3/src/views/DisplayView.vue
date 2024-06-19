@@ -1,19 +1,23 @@
 <template>
-  <CommonComponent v-loading='loadingStatus' :info='getStruct as StructNode' />
+  <CommonComponent v-loading='loadingStatus' :info='getStruct as StructNode' :container="ContainerType.FLOW" />
 </template>
 
 <script setup lang='ts'>
-import { StructNode, useMetaStore } from '@/stores/meta'
+import { useMetaStore } from '@/stores/meta'
 import { storeToRefs } from 'pinia'
 import CommonComponent from '@/components/CommonComponent.vue'
 import { computed } from 'vue'
+import { StructNode, ContainerType } from 'engine-types'
+
 
 const metaStore = useMetaStore()
 const { getStruct, getInitFinsishStatus } = storeToRefs(metaStore)
 
 metaStore.init({
   relationship: {
-    id: 'root'
+    id: 'root',
+    parentId: null,
+    children: null
   },
   componentInfoList: [
     { id: 'root', name: 'FlowLayout' }

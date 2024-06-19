@@ -5,9 +5,10 @@
 </template>
 
 <script setup lang='ts'>
-import { StructNode, useMetaStore } from '@/stores/meta'
+import { useMetaStore } from '@/stores/meta'
+import { StructNode, ContainerType } from 'engine-types';
 import { ref } from 'vue'
-import type { Ref } from 'vue'
+import type { PropType, Ref } from 'vue'
 import CommonComponent from './CommonComponent.vue';
 import { DragPosition } from 'engine-types'
 
@@ -17,6 +18,13 @@ const props = defineProps({
   info: {
     type: StructNode,
     required: true
+  },
+  container: {
+    type: Number as PropType<ContainerType>,
+    default: ContainerType.NONE,
+    validator: (value: number) => {
+      return Object.values(ContainerType).includes(value as ContainerType)
+    }
   }
 })
 
@@ -48,7 +56,7 @@ const drop = (ev: DragEvent) => {
   const newElBasicInfo = JSON.parse(ev.dataTransfer!.getData('text/plain') as string)
   ev.dataTransfer!.clearData()
   metaStore.insert(props.info.id, insert as DragPosition, newElBasicInfo)
-  
+
   postMessage({
     type: 'dragElement', show: false
   })

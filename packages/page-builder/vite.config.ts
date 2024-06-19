@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       strictPort: true,
-      open: false,
+      open: true,
       proxy: {
         [env.VITE_DESIGN_URL]: env.VITE_DESIGN_HOST
       }

@@ -3,93 +3,12 @@ import {
   type ComponentInfo,
   type PageMeta,
   type ComponentRelationship,
-  DragPosition
+  DragPosition,
+  StructNode,
+  ROOT_ID
 } from 'engine-types'
 import { computed, ref } from 'vue'
 import { v4 as uuid } from 'uuid'
-
-/**
- * 根节点id
- */
-const ROOT_ID = 'root'
-
-export class StructNode {
-  readonly id: string
-  readonly name: string
-  readonly type?: string
-  private _parent: StructNode | null = null
-  get parent(): StructNode | null {
-    return this._parent
-  }
-  /**
-   * 设置节点父节点，root节点无父节点
-   */
-  set parent(val: StructNode) {
-    if (this.isRoot()) return
-    this._parent = val
-  }
-  private _children: Array<StructNode> | null = null
-  get children(): Array<StructNode> | null {
-    return this._children || null
-  }
-  private set children(val: Array<StructNode>) {
-    this._children = val
-  }
-
-  constructor(id: string, name: string, type?: 'flex-container') {
-    this.id = id
-    this.name = name
-    this.type = type
-  }
-
-  /**
-   * 判断是否为根节点
-   */
-  isRoot() {
-    return this.id === ROOT_ID
-  }
-
-  /**
-   * 获取当前节点信息
-   */
-  getNodeInfo(): ComponentInfo {
-    return {
-      id: this.id,
-      name: this.name
-    }
-  }
-
-  /**
-   * 以当前节点为根节点获取所有节点信息
-   */
-  getNodeInfoList(): Array<ComponentInfo> {
-    return [
-      this.getNodeInfo(),
-      ...(this.children
-        ?.map((item) => item.getNodeInfoList())
-        .reduce((previousValue, currentValue) => [...previousValue, ...currentValue]) || [])
-    ]
-  }
-
-  /**
-   * 以当前节点为根节点生成节点关系
-   */
-  getNodeRelationship(): ComponentRelationship {
-    return {
-      id: this.id,
-      parentId: this.parent?.id,
-      children: this.children?.map((item) => item.getNodeRelationship()) || null
-    }
-  }
-
-  addChildren(...children: Array<StructNode>) {
-    children.forEach((item) => {
-      item.parent = this
-    })
-    if (!this.children) this.children = []
-    this.children.push(...children)
-  }
-}
 
 export const useMetaStore = defineStore('meta', () => {
   /**
@@ -185,26 +104,16 @@ export const useMetaStore = defineStore('meta', () => {
    */
   const insert = (id: string, position: DragPosition, componentInfo: { name: string }) => {
     const sourceEl = structNodeMap.value.get(id) as StructNode
-    let parent = sourceEl.parent
+    const parent = sourceEl.parent
     if (!parent) {
       // root 节点
       if (position === DragPosition.INNER) {
         const newStructNode = new StructNode(getNewUUID(), componentInfo.name)
-        structNodeMap.value.set(newStructNode.id, newStructNode);
+        structNodeMap.value.set(newStructNode.id, newStructNode)
         sourceEl.addChildren(newStructNode)
         newStructNode.parent = sourceEl
       }
       return
-    }
-    if (!parent.type) {
-      const index = parent.children!.findIndex((item) => item === sourceEl)
-      const replaceContainer = new StructNode(getNewUUID(), 'FlexLayout', 'flex-container')
-      structNodeMap.value.set(replaceContainer.id, replaceContainer)
-      sourceEl.parent = replaceContainer
-      replaceContainer.addChildren(sourceEl)
-      replaceContainer.parent = parent
-      parent.children!.splice(index, 1, replaceContainer)
-      parent = replaceContainer
     }
     const index = parent.children!.findIndex((item) => item === sourceEl)
     const newStructNode = new StructNode(getNewUUID(), componentInfo.name)
